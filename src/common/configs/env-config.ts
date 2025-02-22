@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { z } from 'zod';
 
 const envSchema = z.object({
@@ -10,6 +10,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
   SECRET_API_KEY: z.string(),
+  OTP_EXPIRES_IN: z.string(),
 });
 
 class EnvConfig {

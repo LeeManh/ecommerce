@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { UserSchema } from 'src/user/dtos/user.dto';
+import { UserSchema } from 'src/user/schema/user.schema';
 
 const RegisterUserSchema = UserSchema.pick({
   email: true,

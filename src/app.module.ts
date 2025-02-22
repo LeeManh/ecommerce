@@ -9,9 +9,10 @@ import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import CustomZodValidationPipe from './common/pipes/zod-validation.pipe';
 import { ZodSerializerInterceptor } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { VerificationCodeModule } from './verification-code/verification-code.module';
 
 @Module({
-  imports: [CommonModule, AuthModule, UserModule, RoleModule],
+  imports: [CommonModule, AuthModule, UserModule, RoleModule, VerificationCodeModule],
   controllers: [AppController],
   providers: [
     AppService,
