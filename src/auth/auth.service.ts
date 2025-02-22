@@ -1,16 +1,16 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { HashService } from 'src/common/services/hash.service';
-import { PrismaService } from 'src/common/services/prisma.service';
 import { RoleService } from 'src/role/role.service';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { isPrismaUniqueConstraintError } from 'src/common/libs/errors';
+import { UserRepository } from 'src/user/repository/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly roleService: RoleService,
-    private readonly prismaService: PrismaService,
     private readonly hashService: HashService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async register(registerUserDto: RegisterUserDto) {
@@ -21,7 +21,7 @@ export class AuthService {
         registerUserDto.password,
       );
 
-      const user = await this.prismaService.user.create({
+      const user = await this.userRepository.create({
         data: {
           ...registerUserDto,
           password: hashedPassword,
