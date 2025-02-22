@@ -39,14 +39,4 @@ export class AuthService {
       throw error;
     }
   }
-
-  async login() {}
-
-  async logout() {}
-
-  async resetPassword() {}
-
-  async forgotPassword() {}
-
-  async refreshToken() {}
 }

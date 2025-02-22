@@ -2,19 +2,29 @@ import { UserStatus } from '@prisma/client';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-const UserSchema = z.object({
-  id: z.number(),
-  email: z.string(),
-  name: z.string(),
-  phoneNumber: z.string(),
-  avatar: z.string().nullable(),
-  status: z.enum([UserStatus.ACTIVE, UserStatus.INACTIVE, UserStatus.BLOCKED]),
-  roleId: z.number(),
-  // createdById: z.number().nullable(),
-  // updatedById: z.number().nullable(),
-  // deletedAt: z.date().nullable(),
+export const UserSchema = z.object({
+  id: z.number().int(),
+  email: z.string().email(),
+  name: z.string().min(3).max(500),
+  password: z.string().min(6).max(500),
+  phoneNumber: z.string().min(10).max(50),
+  avatar: z.string().max(1000).nullable().optional(),
+  totpSecret: z.string().max(1000).nullable().optional(),
+  status: z.nativeEnum(UserStatus),
+  roleId: z.number().int(),
+  createdById: z.number().int().nullable().optional(),
+  updatedById: z.number().int().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
-export class UserDto extends createZodDto(UserSchema) {}
+const UserSchemaResponse = UserSchema.omit({
+  password: true,
+  totpSecret: true,
+  createdById: true,
+  updatedById: true,
+  deletedAt: true,
+});
+
+export class UserDto extends createZodDto(UserSchemaResponse) {}
