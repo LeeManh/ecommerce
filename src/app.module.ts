@@ -5,9 +5,10 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
-import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import CustomZodValidationPipe from './common/pipes/zod-validation.pipe';
 import { ZodSerializerInterceptor } from 'nestjs-zod';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
   imports: [CommonModule, AuthModule, UserModule, RoleModule],
@@ -16,6 +17,7 @@ import { ZodSerializerInterceptor } from 'nestjs-zod';
     AppService,
     { provide: APP_PIPE, useClass: CustomZodValidationPipe },
     { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],
 })
 export class AppModule {}
