@@ -3,6 +3,7 @@ import { HashService } from 'src/common/services/hash.service';
 import { PrismaService } from 'src/common/services/prisma.service';
 import { RoleService } from 'src/role/role.service';
 import { RegisterUserDto } from './dtos/register-user.dto';
+import { isPrismaUniqueConstraintError } from 'src/common/libs/errors';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
 
       return user;
     } catch (error: any) {
-      const isEmailTaken = error.code === 'P2002';
+      const isEmailTaken = isPrismaUniqueConstraintError(error);
       if (isEmailTaken) {
         throw new ConflictException('Email is already taken');
       }
