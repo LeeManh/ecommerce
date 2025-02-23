@@ -3,7 +3,6 @@ import { VerificationSchema } from 'src/verification-code/schema/verification.sc
 
 const SendOTPRegisterSchema = VerificationSchema.pick({
   email: true,
-  code: true,
 }).strict();
 
 export class SendOTPRegisterDTO extends createZodDto(SendOTPRegisterSchema) {}

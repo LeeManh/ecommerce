@@ -10,6 +10,7 @@ import { generateOTPCode } from 'src/common/libs/otp.lib';
 import { SendOTPRegisterDTO } from './dtos/send-otp-register.dto';
 import { VerificationCodeType } from '@prisma/client';
 import { VerifyOTPRegisterDto } from './dtos/verify-otp-register.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly roleService: RoleService,
     private readonly userService: UserService,
     private readonly verificationService: VerificationCodeService,
+    private readonly mailService: MailService,
   ) {}
 
   public async register(registerUserDto: RegisterUserDto) {
@@ -38,11 +40,11 @@ export class AuthService {
     // Create a new OTP
     const code = generateOTPCode();
     const expiresAt = addMilliseconds(
-      new Date(),
+      new Date().toISOString(),
       ms(envConfig.OTP_EXPIRES_IN as StringValue),
     );
 
-    const otp = await this.verificationService.createOTP({
+    await this.verificationService.createOTP({
       email: sendOTPRegisterDTO.email,
       type: VerificationCodeType.REGISTER,
       code,
@@ -50,7 +52,15 @@ export class AuthService {
     });
 
     // Send the OTP to the email
-    console.log('OTP:', otp.code);
+    await this.mailService.sendEmail({
+      from: 'Acme <onboarding@resend.dev>',
+      to: ['lemanhddt@gmail.com'],
+      subject: 'OTP Verification Code',
+      html: `
+        <h1>Your OTP is ${code}</h1>
+        <p>This OTP will expire in ${envConfig.OTP_EXPIRES_IN}</p>
+      `,
+    });
   }
 
   public async verifyOTP(verifyOTPRegisterDto: VerifyOTPRegisterDto) {

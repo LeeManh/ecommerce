@@ -11,6 +11,7 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
   SECRET_API_KEY: z.string(),
   OTP_EXPIRES_IN: z.string(),
+  RESEND_API_KEY: z.string(),
 });
 
 class EnvConfig {
