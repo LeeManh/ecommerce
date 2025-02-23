@@ -5,9 +5,8 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Resend } from 'resend';
+import { CreateEmailOptions, CreateEmailRequestOptions, Resend } from 'resend';
 import envConfig from 'src/common/configs/env-config';
-import { SendEmailDto } from './dtos/send-email.dto';
 
 @Injectable()
 export class MailService {
@@ -34,15 +33,11 @@ export class MailService {
     }
   };
 
-  public async sendEmail(sendEmailDto: SendEmailDto) {
-    const { from, to, subject, html } = sendEmailDto;
-
-    const { data, error } = await this.resend.emails.send({
-      from,
-      to,
-      subject,
-      html,
-    });
+  public async sendEmail(
+    payload: CreateEmailOptions,
+    options?: CreateEmailRequestOptions,
+  ) {
+    const { data, error } = await this.resend.emails.send(payload, options);
 
     if (error) return this.handleError(error);
 

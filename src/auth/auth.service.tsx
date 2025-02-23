@@ -11,6 +11,8 @@ import { SendOTPRegisterDTO } from './dtos/send-otp-register.dto';
 import { VerificationCodeType } from '@prisma/client';
 import { VerifyOTPRegisterDto } from './dtos/verify-otp-register.dto';
 import { MailService } from 'src/mail/mail.service';
+import VerifyRegisterOTPEmail from 'src/mail/templates/send-register-otp.template';
+import * as React from 'react';
 
 @Injectable()
 export class AuthService {
@@ -56,10 +58,7 @@ export class AuthService {
       from: 'Ecommerce <noreply@leem.io.vn>',
       to: [sendOTPRegisterDTO.email],
       subject: 'OTP Verification Code',
-      html: `
-        <h1>Your OTP is ${code}</h1>
-        <p>This OTP will expire in ${envConfig.OTP_EXPIRES_IN}</p>
-      `,
+      react: <VerifyRegisterOTPEmail validationCode={code} />,
     });
 
     return {
