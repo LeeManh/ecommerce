@@ -53,14 +53,18 @@ export class AuthService {
 
     // Send the OTP to the email
     await this.mailService.sendEmail({
-      from: 'Acme <onboarding@resend.dev>',
-      to: ['lemanhddt@gmail.com'],
+      from: 'Ecommerce <noreply@leem.io.vn>',
+      to: [sendOTPRegisterDTO.email],
       subject: 'OTP Verification Code',
       html: `
         <h1>Your OTP is ${code}</h1>
         <p>This OTP will expire in ${envConfig.OTP_EXPIRES_IN}</p>
       `,
     });
+
+    return {
+      message: 'OTP has been sent to your email',
+    };
   }
 
   public async verifyOTP(verifyOTPRegisterDto: VerifyOTPRegisterDto) {
