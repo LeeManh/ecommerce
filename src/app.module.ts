@@ -11,9 +11,11 @@ import { ZodSerializerInterceptor } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { VerificationCodeModule } from './verification-code/verification-code.module';
 import { MailModule } from './mail/mail.module';
+import { TokenModule } from './token/token.module';
+import { DeviceModule } from './device/device.module';
 
 @Module({
-  imports: [CommonModule, AuthModule, UserModule, RoleModule, VerificationCodeModule, MailModule],
+  imports: [CommonModule, AuthModule, UserModule, RoleModule, VerificationCodeModule, MailModule, TokenModule, DeviceModule],
   controllers: [AppController],
   providers: [
     AppService,

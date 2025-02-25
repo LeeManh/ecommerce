@@ -56,4 +56,10 @@ export class UserService {
       },
     });
   }
+  public async findByEmail(email: string) {
+    return this.userRepository.findUnique({
+      where: { email },
+      include: { role: true },
+    });
+  }
 }

@@ -1,10 +1,12 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Ip, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { ZodSerializerDto } from 'nestjs-zod';
 import { UserDto } from 'src/user/dtos/user.dto';
 import { SendOTPRegisterDTO } from './dtos/send-otp-register.dto';
 import { VerifyOTPRegisterDto } from './dtos/verify-otp-register.dto';
+import { UserAgent } from 'src/common/decorators/user-agent.decorator';
+import { LoginDto } from './dtos/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,5 +26,14 @@ export class AuthController {
   @Post('verify-otp')
   async verifyOTP(@Body() verifyOTPRegisterDto: VerifyOTPRegisterDto) {
     return this.authService.verifyOTP(verifyOTPRegisterDto);
+  }
+
+  @Post('login')
+  async login(
+    @Body() loginDto: LoginDto,
+    @UserAgent() userAgent: string,
+    @Ip() ip: string,
+  ) {
+    return this.authService.login(loginDto, userAgent, ip);
   }
 }

@@ -74,6 +74,7 @@ model User {
   userTranslations            UserTranslation[]     @relation("User")
   sentMessages                Message[]             @relation("FromUser")
   receivedMessages            Message[]             @relation("ToUser")
+  devices                     Device[] // Liên kết 1-n với Device
 
   // 1 user có thể tạo ra nhiều user khác
   // 1 user chỉ có thể được tạo ra bởi 1 user khác
@@ -124,9 +125,11 @@ model VerificationCode {
 }
 
 model RefreshToken {
-  token  String @unique @db.VarChar(1000)
-  userId Int
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  token     String   @unique @db.VarChar(1000)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  deviceId  Int // Foreign key tới Device
+  device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   expiresAt DateTime
   createdAt DateTime @default(now())
@@ -423,6 +426,18 @@ model Message {
 
   readAt    DateTime?
   createdAt DateTime  @default(now())
+}
+
+model Device {
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userAgent     String
+  ip            String
+  lastActive    DateTime       @default(now()) // Thay updatedAt bằng lastActive cho ý nghĩa rõ hơn
+  createdAt     DateTime       @default(now())
+  isActive      Boolean        @default(true) // Trạng thái thiết bị (đang login hay đã logout)
+  refreshTokens RefreshToken[] // Liên kết 1-n với RefreshToken
 }
 
 enum OrderStatus {
