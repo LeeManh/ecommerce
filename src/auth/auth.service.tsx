@@ -48,48 +48,53 @@ export class AuthService {
   }
 
   public async login(loginDto: LoginDto, userAgent: string, ip: string) {
-    const { email, password } = loginDto;
+    try {
+      const { email, password } = loginDto;
 
-    /* ----------------------- validate email and password ---------------------- */
-    const user = await this.userService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('Invalid email or password');
+      /* ----------------------- validate email and password ---------------------- */
+      const user = await this.userService.findByEmail(email);
+      if (!user) throw new UnauthorizedException('Invalid email or password');
 
-    const isPasswordMatch = await this.hashService.compare(
-      password,
-      user.password as string,
-    );
-    if (!isPasswordMatch)
-      throw new UnauthorizedException('Invalid email or password');
+      const isPasswordMatch = await this.hashService.compare(
+        password,
+        user.password as string,
+      );
+      if (!isPasswordMatch)
+        throw new UnauthorizedException('Invalid email or password');
 
-    /* ------------------------ Create device user login ------------------------ */
-    const device = await this.deviceService.createDevice({
-      userAgent,
-      ip,
-      userId: user.id as number,
-    });
+      /* ------------------------ Create device user login ------------------------ */
+      const device = await this.deviceService.createDevice({
+        userAgent,
+        ip,
+        userId: user.id as number,
+      });
 
-    /* ------------------ create access token and refresh token ----------------- */
-    const payloadToken: TokenPayload = {
-      userId: user.id as number,
-      roleId: user.roleId as number,
-      deviceId: device.id as number,
-    };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.tokenService.generateAccessToken(payloadToken),
-      this.tokenService.generateRefreshToken(payloadToken),
-    ]);
+      /* ------------------ create access token and refresh token ----------------- */
+      const payloadToken: TokenPayload = {
+        userId: user.id as number,
+        roleId: user.roleId as number,
+        deviceId: device.id as number,
+      };
+      const [accessToken, refreshToken] = await Promise.all([
+        this.tokenService.generateAccessToken(payloadToken),
+        this.tokenService.generateRefreshToken(payloadToken),
+      ]);
 
-    /* --------------------- save refresh token to database --------------------- */
-    await this.tokenService.saveRefreshToken({
-      userId: user.id as number,
-      deviceId: device.id as number,
-      token: refreshToken,
-    });
+      /* --------------------- save refresh token to database --------------------- */
+      await this.tokenService.saveRefreshToken({
+        userId: user.id as number,
+        deviceId: device.id as number,
+        token: refreshToken,
+      });
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new UnauthorizedException(error.message);
+    }
   }
 
   public async sendOTP(sendOTPRegisterDTO: SendOTPRegisterDTO) {
