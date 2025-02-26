@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RoleService } from 'src/role/role.service';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { VerificationCodeService } from 'src/verification-code/verification-code.service';
@@ -18,6 +22,7 @@ import { HashService } from 'src/common/services/hash.service';
 import { TokenService } from 'src/token/token.service';
 import { TokenPayload } from 'src/token/types/token.type';
 import { DeviceService } from 'src/device/device.service';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -75,13 +80,10 @@ export class AuthService {
     ]);
 
     /* --------------------- save refresh token to database --------------------- */
-    const decodedRefreshToken =
-      await this.tokenService.verifyRefreshToken(refreshToken);
-    await this.tokenService.createToken({
+    await this.tokenService.saveRefreshToken({
       userId: user.id as number,
       deviceId: device.id as number,
       token: refreshToken,
-      expiresAt: new Date(decodedRefreshToken.exp * 1000), // convert to milliseconds
     });
 
     return {
@@ -124,5 +126,54 @@ export class AuthService {
       ...verifyOTPRegisterDto,
       type: VerificationCodeType.REGISTER,
     });
+  }
+
+  public async refreshToken(
+    refreshTokenDto: RefreshTokenDto,
+    userAgent: string,
+    ip: string,
+  ) {
+    try {
+      const { token } = refreshTokenDto;
+
+      /* ------------------------- validate refresh token ------------------------- */
+      const decodedRefreshToken =
+        await this.tokenService.verifyRefreshToken(token);
+      const oldRefreshToken =
+        await this.tokenService.findOneTokenByToken(token);
+      if (!oldRefreshToken)
+        throw new UnauthorizedException('Invalid refresh token');
+
+      /* --------------------------- Update device login -------------------------- */
+      const device = await this.deviceService.updateDevice(
+        decodedRefreshToken.deviceId,
+        { ip, userAgent },
+      );
+
+      /* ------------------ create access token and refresh token ----------------- */
+      const payloadToken: TokenPayload = {
+        userId: decodedRefreshToken.userId,
+        roleId: decodedRefreshToken.roleId,
+        deviceId: device.id as number,
+      };
+      const [accessToken, refreshToken] = await Promise.all([
+        this.tokenService.generateAccessToken(payloadToken),
+        this.tokenService.generateRefreshToken(payloadToken),
+      ]);
+
+      /* --------------------- replace token to database --------------------- */
+      await this.tokenService.replaceRefreshToken(token, refreshToken, {
+        userId: decodedRefreshToken.userId,
+        deviceId: device.id as number,
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new UnauthorizedException(error.message);
+    }
   }
 }

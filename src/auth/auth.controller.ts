@@ -7,6 +7,7 @@ import { SendOTPRegisterDTO } from './dtos/send-otp-register.dto';
 import { VerifyOTPRegisterDto } from './dtos/verify-otp-register.dto';
 import { UserAgent } from 'src/common/decorators/user-agent.decorator';
 import { LoginDto } from './dtos/login.dto';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -35,5 +36,14 @@ export class AuthController {
     @Ip() ip: string,
   ) {
     return this.authService.login(loginDto, userAgent, ip);
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @UserAgent() userAgent: string,
+    @Ip() ip: string,
+  ) {
+    return this.authService.refreshToken(refreshTokenDto, userAgent, ip);
   }
 }
